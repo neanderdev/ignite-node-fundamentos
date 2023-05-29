@@ -1,8 +1,9 @@
 import http from 'node:http'
 
 import { json } from './middleware/json.js'
+import { Database } from './database.js'
 
-const users = []
+const databse = new Database()
 
 const server = http.createServer(async (request, response) => {
   const { method, url } = request
@@ -10,6 +11,8 @@ const server = http.createServer(async (request, response) => {
   await json(request, response)
 
   if (method === 'GET' && url === '/users') {
+    const users = databse.select('users')
+
     return response
       .end(JSON.stringify(users))
   }
@@ -17,11 +20,13 @@ const server = http.createServer(async (request, response) => {
   if (method === 'POST' && url === '/users') {
     const { name, email } = request.body
 
-    users.push({
+   const user = {
       id: 1,
       name,
       email,
-    })
+    }
+
+    databse.insert('users', user)
 
     return response.writeHead(201).end()
   }
